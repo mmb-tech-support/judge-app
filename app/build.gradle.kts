@@ -35,6 +35,7 @@ android {
     }
 
     signingConfigs {
+        // TODO: Configure signing
         // release {
         //     storeFile file(SPORTIDUINO_STORE_FILE)
         //     storePassword SPORTIDUINO_STORE_PASSWORD
@@ -104,13 +105,17 @@ tasks.named("check") {
 spotbugs {
     toolVersion.set("4.9.3")
     excludeFilter.set(file("$rootDir/config/spotbugs/spotbugs-exclude.xml"))
-    reportsDir.set(file("$buildDir/reports/spotbugs"))
+    reportsDir.set(file("$rootDir/app/build/reports/spotbugs"))
 }
 
 tasks.withType<SpotBugsTask>().configureEach {
     reports {
-        getByName("xml").required.set(true)
-        getByName("html").required.set(true)
+        create("xml") {
+            required.set(true)
+        }
+        create("html") {
+            required.set(true)
+        }
     }
 }
 
