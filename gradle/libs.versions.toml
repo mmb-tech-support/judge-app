@@ -1,10 +1,22 @@
 [versions]
+acraVersion = "5.12.0"
 agp = "8.13.0"
+appcompatVersion = "1.7.1"
+constraintlayoutVersion = "2.2.1"
+findsecbugsPluginVersion = "1.14.0"
 kotlin = "2.0.21"
-coreKtx = "1.10.1"
+localbroadcastmanagerVersion = "1.1.0"
+materialVersion = "1.13.0"
 
 [libraries]
-androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+acra-core = { module = "ch.acra:acra-core", version.ref = "acraVersion" }
+acra-toast = { module = "ch.acra:acra-toast", version.ref = "acraVersion" }
+acra-http = { module = "ch.acra:acra-http", version.ref = "acraVersion" }
+androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompatVersion" }
+androidx-constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version.ref = "constraintlayoutVersion" }
+androidx-localbroadcastmanager = { module = "androidx.localbroadcastmanager:localbroadcastmanager", version.ref = "localbroadcastmanagerVersion" }
+findsecbugs-plugin = { module = "com.h3xstream.findsecbugs:findsecbugs-plugin", version.ref = "findsecbugsPluginVersion" }
+material = { module = "com.google.android.material:material", version.ref = "materialVersion" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

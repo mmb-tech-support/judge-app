@@ -27,7 +27,10 @@ android {
         getByName("release") {
             isMinifyEnabled = true
             isShrinkResources = true
-            proguardFiles(getDefaultProguardFile("proguard-android.txt"))
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
 
@@ -112,15 +115,14 @@ tasks.withType<SpotBugsTask>().configureEach {
 }
 
 dependencies {
-    implementation("androidx.appcompat:appcompat:1.7.1")
-    implementation("androidx.localbroadcastmanager:localbroadcastmanager:1.1.0")
-    implementation("com.google.android.material:material:1.13.0-beta01")
-    implementation("androidx.constraintlayout:constraintlayout:2.2.1")
+    implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.localbroadcastmanager)
+    implementation(libs.material)
+    implementation(libs.androidx.constraintlayout)
 
-    spotbugsPlugins("com.h3xstream.findsecbugs:findsecbugs-plugin:1.14.0")
+    spotbugsPlugins(libs.findsecbugs.plugin)
 
-    val acraVersion = "5.12.0"
-    implementation("ch.acra:acra-core:$acraVersion")
-    implementation("ch.acra:acra-http:$acraVersion")
-    implementation("ch.acra:acra-toast:$acraVersion")
+    implementation(libs.acra.core)
+    implementation(libs.acra.http)
+    implementation(libs.acra.toast)
 }
