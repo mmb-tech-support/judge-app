@@ -64,27 +64,19 @@ public class MenuActivity extends AppCompatActivity {
         mNavigationView.setNavigationItemSelectedListener(menuItem -> {
             // Process selected menu item
             Intent activity = null;
-            switch (menuItem.getItemId()) {
-                case R.id.database:
-                    activity = new Intent(getApplicationContext(), DatabaseActivity.class);
-                    break;
-                case R.id.bluetooth:
-                    activity = new Intent(getApplicationContext(), BluetoothActivity.class);
-                    break;
-                case R.id.chip_init:
-                    activity = new Intent(getApplicationContext(), ChipInitActivity.class);
-                    break;
-                case R.id.control_point:
-                    activity = new Intent(getApplicationContext(), ControlPointActivity.class);
-                    break;
-                case R.id.team_list:
-                    Toast.makeText(this, R.string.err_todo_team_list,
-                            Toast.LENGTH_LONG).show();
-                    break;
-                case R.id.chip_info:
-                    activity = new Intent(getApplicationContext(), ChipInfoActivity.class);
-                    break;
-                default:
+            int id = menuItem.getItemId();
+            if (id == R.id.database) {
+                activity = new Intent(getApplicationContext(), DatabaseActivity.class);
+            } else if (id == R.id.bluetooth) {
+                activity = new Intent(getApplicationContext(), BluetoothActivity.class);
+            } else if (id == R.id.chip_init) {
+                activity = new Intent(getApplicationContext(), ChipInitActivity.class);
+            } else if (id == R.id.control_point) {
+                activity = new Intent(getApplicationContext(), ControlPointActivity.class);
+            } else if (id == R.id.team_list) {
+                Toast.makeText(this, R.string.err_todo_team_list, Toast.LENGTH_LONG).show();
+            } else if (id == R.id.chip_info) {
+                activity = new Intent(getApplicationContext(), ChipInfoActivity.class);
             }
             // Switch to new activity
             if (activity != null) {
