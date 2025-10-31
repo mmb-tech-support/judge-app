@@ -50,24 +50,33 @@ public class ChipInfoTask extends AsyncTask<Boolean, Void, Boolean> {
     protected Boolean doInBackground(final Boolean... saveToDBParams) {
         // Send command to connected station
         if (MainApp.mStation == null) return Boolean.FALSE;
+
         MainApp.mStation.fetchStatus();
         final Boolean result = MainApp.mStation.readCard();
+        
         // Save list of punches from the chip in main app
         MainApp.mChipPunches = new Records(0);
         MainApp.mChipPunches.join(MainApp.mStation.getRecords());
-        // Save punches from chip to database
-        if (saveToDBParams[0] && result) {
-            for (int i = 1; i < MainApp.mChipPunches.size(); i++) {
-                MainApp.mAllRecords.addRecord(MainApp.mChipPunches.getRecord(i));
-            }
-            final String saveResult = MainApp.mAllRecords.saveNewRecords(MainApp.mDatabase);
-            if (!"".equals(saveResult)) {
-                final ChipInfoActivity activity = mActivityRef.get();
-                if (activity != null && !activity.isFinishing()) {
-                    Toast.makeText(activity, saveResult, Toast.LENGTH_LONG).show();
-                }
-            }
+        
+        if (!saveToDBParams[0] || !result) {
+            return result;
         }
+        
+        // Save punches from chip to database
+        for (int i = 1; i < MainApp.mChipPunches.size(); i++) {
+            MainApp.mAllRecords.addRecord(MainApp.mChipPunches.getRecord(i));
+        }
+
+        final String saveResult = MainApp.mAllRecords.saveNewRecords(MainApp.mDatabase);
+        if (saveResult.isEmpty()) {
+            return result;
+        }
+
+        final ChipInfoActivity activity = mActivityRef.get();
+        if (activity != null && !activity.isFinishing()) {
+            Toast.makeText(activity, saveResult, Toast.LENGTH_LONG).show();
+        }
+
         return result;
     }
 

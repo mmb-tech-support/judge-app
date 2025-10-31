@@ -82,7 +82,7 @@ public final class ChipInfoActivity extends MenuActivity {
         mPointAdapter = new PointListAdapter(MainApp.mChipPunches);
         pointsList.setAdapter(mPointAdapter);
         // Restore SaveToDB switch state
-        ((Switch) findViewById(R.id.info_save_to_db)).setChecked(MainApp.UI_STATE.getChipInfoSaveToDB());
+        ((Switch) findViewById(R.id.info_save_to_db)).setChecked(MainApp.UI_STATE.isChipInfoSavedToDB());
         // Update layout
         updateLayout();
     }

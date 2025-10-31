@@ -38,6 +38,7 @@ import ru.mmb.sportiduinomanager.task.ResetStationTask;
 /**
  * Provides ability to discover a station, connect to it and set it's mode.
  */
+@SuppressWarnings("PMD.ExcessiveImports")
 public final class BluetoothActivity extends MenuActivity implements BTDeviceListAdapter.OnItemClicked {
     /**
      * Bluetooth adapter state: hardware is absent.

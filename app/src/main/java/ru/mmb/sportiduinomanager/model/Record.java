@@ -5,6 +5,7 @@ import androidx.annotation.NonNull;
 /**
  * A Sportiduino record (chip initialization or station punch).
  */
+@SuppressWarnings("PMD.OverrideBothEqualsAndHashCodeOnComparable")
 public final class Record implements Comparable<Record> {
     /**
      * Record status: new, exists only in app memory.

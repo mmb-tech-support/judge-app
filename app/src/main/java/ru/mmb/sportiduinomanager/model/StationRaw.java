@@ -14,6 +14,7 @@ import ru.mmb.sportiduinomanager.R;
 /**
  * Provides low level access to a Bluetooth station.
  */
+@SuppressWarnings({"PMD.LongVariable", "PMD.AvoidSynchronizedStatement"})
 public class StationRaw {
     /**
      * Code of setMode station command.
@@ -485,8 +486,8 @@ public class StationRaw {
      * @param buffer Data send to or received from the station
      */
     private void logBuffer(final String tag, final byte[] buffer) {
-        StringBuilder message = new StringBuilder();
-        for (byte b : buffer) {
+        final StringBuilder message = new StringBuilder();
+        for (final byte b : buffer) {
             message.append(String.format("%02x ", b));
         }
         Log.i(tag, message.toString());
@@ -500,7 +501,7 @@ public class StationRaw {
      */
     private byte[] runCommand(final byte[] sendBuffer) {
         // print data sent to the station
-        logBuffer("Sent to station", sendBuffer);
+        logBuffer("Sent", sendBuffer);
         // reconnect (just in case and send the command
         if (!connect()) return new byte[]{SEND_FAILED};
         if (!send(sendBuffer)) return new byte[]{SEND_FAILED};
@@ -509,7 +510,7 @@ public class StationRaw {
         final int len = receiveBuffer.length;
         if (len == 0) return new byte[]{REC_TIMEOUT};
         // print data received from the station
-        logBuffer("Received from station", receiveBuffer);
+        logBuffer("Received", receiveBuffer);
         // check signature
         if (receiveBuffer[0] != HEADER_SIGNATURE) return new byte[]{REC_BAD_SIGNATURE};
         // check if response has at minimum 1 byte payload

@@ -4,7 +4,7 @@ plugins {
     id("com.android.application")
     id("checkstyle")
     id("pmd")
-    id("com.github.spotbugs") version "6.1.13"
+    id("com.github.spotbugs") version "6.4.4"
 }
 
 android {
@@ -15,7 +15,9 @@ android {
         applicationId = "ru.mmb.sportiduinomanager"
         minSdk = 21
         targetSdk = 36
-        resourceConfigurations += listOf("ru", "en")
+        androidResources {
+            localeFilters += listOf("ru", "en")
+        }
     }
 
     buildTypes {
@@ -71,7 +73,7 @@ android {
 
 // Checkstyle
 checkstyle {
-    toolVersion = "10.25.0"
+    toolVersion = "12.1.1"
     configFile = file("${rootDir}/config/checkstyle/checkstyle.xml")
 }
 tasks.register<Checkstyle>("checkstyle") {
@@ -86,7 +88,7 @@ tasks.named("check") {
 
 // Pmd
 pmd {
-    toolVersion = "7.14.0"
+    toolVersion = "7.18.0"
     ruleSets = emptyList()
     ruleSetFiles = files("$rootDir/config/pmd/rules-pmd.xml")
 }
@@ -103,7 +105,7 @@ tasks.named("check") {
 
 // Spotbugs
 spotbugs {
-    toolVersion.set("4.9.3")
+    toolVersion.set("4.9.8")
     excludeFilter.set(file("$rootDir/config/spotbugs/spotbugs-exclude.xml"))
     reportsDir.set(file("$rootDir/app/build/reports/spotbugs"))
 }

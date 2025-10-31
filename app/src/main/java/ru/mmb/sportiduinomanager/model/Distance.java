@@ -6,6 +6,7 @@ import java.util.List;
 /**
  * Support of distance parameters, points lists and discounts.
  */
+@SuppressWarnings("PMD.TooManyMethods")
 public final class Distance {
     /**
      * Raid_id from website database.
@@ -208,16 +209,15 @@ public final class Distance {
      */
     public List<String> getPointNames(final String prefix) {
         final List<String> names = new ArrayList<>();
-        if (mPoints != null) {
-            for (final Point point : mPoints) {
-                if (point != null) {
-                    final String name = point.mName;
-                    if (name.charAt(0) >= '0' && name.charAt(0) <= '9') {
-                        names.add(prefix + name);
-                    } else {
-                        names.add(name);
-                    }
-                }
+        if (mPoints == null) return names;
+        for (final Point point : mPoints) {
+            if (point == null) continue;
+
+            final String name = point.mName;
+            if (name.charAt(0) >= '0' && name.charAt(0) <= '9') {
+                names.add(prefix + name);
+            } else {
+                names.add(name);
             }
         }
         return names;

@@ -132,6 +132,7 @@ public class TeamListAdapter extends RecyclerView.Adapter<TeamListAdapter.TeamHo
     /**
      * Declare interface for click processing.
      */
+    @SuppressWarnings("PMD.ImplicitFunctionalInterface")
     public interface OnTeamClicked {
         /**
          * Implemented in BluetoothActivity class.

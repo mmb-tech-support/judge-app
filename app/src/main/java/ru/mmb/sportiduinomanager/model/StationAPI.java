@@ -307,6 +307,7 @@ public final class StationAPI extends StationRaw {
      *
      * @return True if we got valid response from station, check mLastError otherwise
      */
+    @SuppressWarnings("PMD.ReplaceJavaUtilCalendar")
     public boolean syncTime() {
         final byte[] commandData = new byte[7];
         commandData[0] = CMD_SET_TIME;

@@ -32,13 +32,12 @@ jobs:
       - name: Checkstyle
         run: ./gradlew checkstyle --no-daemon
 
-      # TODO: Fix pmd build
-#      - name: PMD
-#        run: ./gradlew pmd --no-daemon
+      - name: PMD
+        run: ./gradlew pmd --no-daemon
 
-      # TODO: Fix SpotBugs build
-#      - name: SpotBugs
-#        run: ./gradlew spotbugsMain --no-daemon
+      # The task is non-blocking and can fail for now.
+      - name: SpotBugs
+        run: ./gradlew spotbugsRelease --no-daemon || true
 
       - name: Build all build type
         run: ./gradlew :app:assemble -PminifyWithR8=false
@@ -48,3 +47,10 @@ jobs:
         with:
           name: APKs
           path: '**/build/outputs/apk/**/*.apk'
+
+      - name: Upload static analysis reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: Static Analysis Reports
+          path: |
+            app/build/reports/**

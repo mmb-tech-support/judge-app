@@ -174,7 +174,7 @@ class UIState {
      *
      * @return ChipInfoSaveToDB flag value
      */
-    boolean getChipInfoSaveToDB() {
+    boolean isChipInfoSavedToDB() {
         return mChipInfoSaveToDB;
     }
 

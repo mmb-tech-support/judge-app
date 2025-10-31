@@ -1,5 +1,5 @@
 [versions]
-acraVersion = "5.12.0"
+acraVersion = "5.13.1"
 agp = "8.13.0"
 appcompatVersion = "1.7.1"
 constraintlayoutVersion = "2.2.1"

@@ -123,33 +123,32 @@ public final class ChipInitActivity extends MenuActivity implements MemberListAd
     @SuppressLint("NonConstantResourceId")
     public void keyboardButtonClicked(final View view) {
         // Update team number string according to button clicked
-        int id = view.getId();
-
-        if (id == R.id.key_0) {
+        final int buttonId = view.getId();
+        if (buttonId == R.id.key_0) {
             mTeamNumber += "0";
-        } else if (id == R.id.key_1) {
+        } else if (buttonId == R.id.key_1) {
             mTeamNumber += "1";
-        } else if (id == R.id.key_2) {
+        } else if (buttonId == R.id.key_2) {
             mTeamNumber += "2";
-        } else if (id == R.id.key_3) {
+        } else if (buttonId == R.id.key_3) {
             mTeamNumber += "3";
-        } else if (id == R.id.key_4) {
+        } else if (buttonId == R.id.key_4) {
             mTeamNumber += "4";
-        } else if (id == R.id.key_5) {
+        } else if (buttonId == R.id.key_5) {
             mTeamNumber += "5";
-        } else if (id == R.id.key_6) {
+        } else if (buttonId == R.id.key_6) {
             mTeamNumber += "6";
-        } else if (id == R.id.key_7) {
+        } else if (buttonId == R.id.key_7) {
             mTeamNumber += "7";
-        } else if (id == R.id.key_8) {
+        } else if (buttonId == R.id.key_8) {
             mTeamNumber += "8";
-        } else if (id == R.id.key_9) {
+        } else if (buttonId == R.id.key_9) {
             mTeamNumber += "9";
-        } else if (id == R.id.key_del) {
+        } else if (buttonId == R.id.key_del) {
             if (!mTeamNumber.isEmpty()) {
                 mTeamNumber = mTeamNumber.substring(0, mTeamNumber.length() - 1);
             }
-        } else if (id == R.id.key_clear) {
+        } else if (buttonId == R.id.key_clear) {
             mTeamNumber = "";
         } else {
             return;
