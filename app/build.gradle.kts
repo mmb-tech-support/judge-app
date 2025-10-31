@@ -4,7 +4,7 @@ plugins {
     id("com.android.application")
     id("checkstyle")
     id("pmd")
-    id("com.github.spotbugs") version "6.1.13"
+    id("com.github.spotbugs") version "6.4.4"
 }
 
 android {
