@@ -129,6 +129,7 @@ public class MemberListAdapter extends RecyclerView.Adapter<MemberListAdapter.Me
     /**
      * Declare interface for click processing.
      */
+    @SuppressWarnings("PMD.ImplicitFunctionalInterface")
     public interface OnMemberClicked {
         /**
          * Implemented in ChipInitActivity class.

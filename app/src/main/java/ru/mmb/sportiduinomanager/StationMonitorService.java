@@ -191,6 +191,7 @@ public class StationMonitorService extends Service {
      *
      * @return -1/0/error code
      */
+    @SuppressWarnings("PMD.AvoidDeeplyNestedIfStmts")
     private int fetchTeamsPunches() {
         // Build the list of teams to fetch their data
         final List<Integer> fetchTeams = getTeamsToFetch();

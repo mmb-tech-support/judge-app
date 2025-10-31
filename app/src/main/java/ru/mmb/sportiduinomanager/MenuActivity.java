@@ -64,18 +64,18 @@ public class MenuActivity extends AppCompatActivity {
         mNavigationView.setNavigationItemSelectedListener(menuItem -> {
             // Process selected menu item
             Intent activity = null;
-            int id = menuItem.getItemId();
-            if (id == R.id.database) {
+            final int itemId = menuItem.getItemId();
+            if (itemId == R.id.database) {
                 activity = new Intent(getApplicationContext(), DatabaseActivity.class);
-            } else if (id == R.id.bluetooth) {
+            } else if (itemId == R.id.bluetooth) {
                 activity = new Intent(getApplicationContext(), BluetoothActivity.class);
-            } else if (id == R.id.chip_init) {
+            } else if (itemId == R.id.chip_init) {
                 activity = new Intent(getApplicationContext(), ChipInitActivity.class);
-            } else if (id == R.id.control_point) {
+            } else if (itemId == R.id.control_point) {
                 activity = new Intent(getApplicationContext(), ControlPointActivity.class);
-            } else if (id == R.id.team_list) {
+            } else if (itemId == R.id.team_list) {
                 Toast.makeText(this, R.string.err_todo_team_list, Toast.LENGTH_LONG).show();
-            } else if (id == R.id.chip_info) {
+            } else if (itemId == R.id.chip_info) {
                 activity = new Intent(getApplicationContext(), ChipInfoActivity.class);
             }
             // Switch to new activity

@@ -84,6 +84,7 @@ public final class SiteRequest {
     /**
      * Result of parsing of server response.
      */
+    @SuppressWarnings("PMD.SingularField")
     private RequestResult mParsingResult;
     /**
      * A distance successfully loaded from downloaded file.
@@ -191,7 +192,7 @@ public final class SiteRequest {
         } else {
             urlString = MAIN_DATABASE_URL;
         }
-        URL url;
+        final URL url;
         try {
             url = new URL(urlString);
         } catch (MalformedURLException e) {
@@ -550,6 +551,7 @@ public final class SiteRequest {
     /**
      * Request result codes.
      */
+    @SuppressWarnings("PMD.ShortVariable")
     public enum RequestResult {
         /**
          * Downloaded data parsing was successful.

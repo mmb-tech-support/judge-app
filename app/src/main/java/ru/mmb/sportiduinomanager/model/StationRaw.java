@@ -14,6 +14,7 @@ import ru.mmb.sportiduinomanager.R;
 /**
  * Provides low level access to a Bluetooth station.
  */
+@SuppressWarnings({"PMD.LongVariable", "PMD.AvoidSynchronizedStatement"})
 public class StationRaw {
     /**
      * Code of setMode station command.
@@ -485,8 +486,8 @@ public class StationRaw {
      * @param buffer Data send to or received from the station
      */
     private void logBuffer(final String tag, final byte[] buffer) {
-        StringBuilder message = new StringBuilder();
-        for (byte b : buffer) {
+        final StringBuilder message = new StringBuilder();
+        for (final byte b : buffer) {
             message.append(String.format("%02x ", b));
         }
         Log.i(tag, message.toString());

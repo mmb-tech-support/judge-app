@@ -16,6 +16,7 @@ import java.util.TimeZone;
 /**
  * Handling Sportiduino records (initialization/punches) received from stations.
  */
+@SuppressWarnings("PMD.TooManyMethods")
 public final class Records {
     /**
      * Used as return string when no SQL error has been occurred.
@@ -49,6 +50,7 @@ public final class Records {
      * @param format Print format such as "dd.MM  HH:mm:ss"
      * @return String representation of time
      */
+    @SuppressWarnings("PMD.ReplaceJavaUtilCalendar")
     public static String printTime(final long time, final String format) {
         if (time <= 0) return "-";
         // Use fixed +3 hours offset
@@ -194,6 +196,7 @@ public final class Records {
      * @param stationMAC  Station MAC as long
      * @return New Records object with list of filtered records
      */
+    @SuppressWarnings("PMD.AvoidDeeplyNestedIfStmts")
     public Records getPunchesAtStation(final int pointNumber, final long stationMAC) {
         final List<Record> punches = new ArrayList<>();
         // Filter records

@@ -46,32 +46,32 @@ public final class MainApp extends Application {
     /**
      * Teams with members downloaded from site or loaded from local database.
      */
-    public static Teams mTeams = new Teams(0);
+    public static Teams mTeams = new Teams(0); // NOPMD - Intentionally global app-wide state
     /**
      * Database object for loading/saving data to local SQLite database.
      */
-    public static Database mDatabase;
+    public static Database mDatabase; // NOPMD - Intentionally global app-wide state
     /**
      * Connected Bluetooth station.
      */
-    public static StationAPI mStation;
+    public static StationAPI mStation; // NOPMD - Intentionally global app-wide state
     /**
      * List of all Sportiduino records received from connected stations.
      */
-    public static Records mAllRecords = new Records(0);
+    public static Records mAllRecords = new Records(0); // NOPMD - Intentionally global app-wide state
     /**
      * List of punches read from a chip at ChipInfo activity.
      */
-    public static Records mChipPunches = new Records(0);
+    public static Records mChipPunches = new Records(0); // NOPMD - Intentionally global app-wide state
     /**
      * Distance downloaded from site or loaded from local database.
      */
-    public static Distance mDistance = new Distance();
+    public static Distance mDistance = new Distance(); // NOPMD - Intentionally global app-wide state
     /**
      * Filtered list of records with team punches at connected station.
      * Last punch per team only. Should be equal to records in station flash memory.
      */
-    static Records mPointPunches = new Records(0);
+    static Records mPointPunches = new Records(0); // NOPMD - Intentionally global app-wide state
     /**
      * True if ControlPointActivity is running in foreground.
      */
@@ -121,7 +121,7 @@ public final class MainApp extends Application {
      */
     // TODO: remove 'force' parameter
     public static void setAllRecords(final Records records, final boolean force) {
-        synchronized (MainApp.class) {
+        synchronized (MainApp.class) { // NOPMD - Single app-wide lock acceptable for this critical section
             if (force || mAllRecords == null) {
                 // Forget old records and replace them with new
                 mAllRecords = records;

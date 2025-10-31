@@ -154,6 +154,7 @@ public class BTDeviceListAdapter extends RecyclerView.Adapter<BTDeviceListAdapte
     /**
      * Declare interface for click processing.
      */
+    @SuppressWarnings("PMD.ImplicitFunctionalInterface")
     public interface OnItemClicked {
         /**
          * Implemented in BluetoothActivity class.
