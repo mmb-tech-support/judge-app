@@ -285,7 +285,7 @@ public final class MainApp extends Application {
                                 .withUri("https://mmb.progressor.ru/php/mmbscripts/acra.php")
                                 .withHttpMethod(HttpSender.Method.POST)
                                 .withTlsProtocols(TLS.V1_3, TLS.V1_2)
-                                .build(),,
+                                .build(),
                         new ToastConfigurationBuilder().withText(getString(R.string.acra_toast_text)).build()
                 ));
     }

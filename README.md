@@ -7,8 +7,17 @@
 ## Настройка окружения
 
 Необходимо:
-- [Android Studio][android-studio]
+- Установить [Android Studio][android-studio] и добавить путь к SDK в переменные окружения или в local.properties.
 
+## MacOS / Linux
+```bash
+export ANDROID_HOME=$HOME/Library/Android/sdk
+export PATH=$PATH:$ANDROID_HOME/platform-tools
+```
+Или
+```text
+sdk.dir=/Users/<name>/Library/Android/sdk
+```
 
 
 [android-studio]: https://developer.android.com/studio

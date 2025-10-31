@@ -15,7 +15,9 @@ android {
         applicationId = "ru.mmb.sportiduinomanager"
         minSdk = 21
         targetSdk = 36
-        resourceConfigurations += listOf("ru", "en")
+        androidResources {
+            localeFilters += listOf("ru", "en")
+        }
     }
 
     buildTypes {
