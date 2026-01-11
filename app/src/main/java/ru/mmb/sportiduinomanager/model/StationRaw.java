@@ -490,7 +490,7 @@ public class StationRaw {
         for (final byte b : buffer) {
             message.append(String.format("%02x ", b));
         }
-        Log.i(tag, message.toString());
+        Log.d(tag, message.toString());
     }
 
     /**
