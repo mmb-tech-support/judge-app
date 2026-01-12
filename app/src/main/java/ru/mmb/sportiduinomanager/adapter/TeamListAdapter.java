@@ -24,7 +24,7 @@ import ru.mmb.sportiduinomanager.model.Records;
  */
 public class TeamListAdapter extends ListAdapter<TeamListAdapter.TeamView, TeamListAdapter.TeamHolder> {
     /**
-     * callback
+     * callback.
      */
     private final OnSelect mOnSelect;
 
@@ -37,13 +37,13 @@ public class TeamListAdapter extends ListAdapter<TeamListAdapter.TeamView, TeamL
     private List<TeamView> mTeamViewList = new ArrayList<>();
 
     /**
-     * current selected or null
+     * current selected or null.
      */
     @Getter
     private TeamView mCurrentSelected;
 
     /**
-     * DiffUtil realization for TeamListAdapter
+     * DiffUtil realization for TeamListAdapter.
      */
     private static final DiffUtil.ItemCallback<TeamView> DIFF_CALLBACK = new DiffUtil.ItemCallback<>() {
         @Override
@@ -63,7 +63,8 @@ public class TeamListAdapter extends ListAdapter<TeamListAdapter.TeamView, TeamL
     @FunctionalInterface
     public interface OnSelect {
         /**
-         * callback method
+         * callback method.
+         *
          * @param team - TeamView of selected team
          */
         void accept(TeamView team);
@@ -107,7 +108,7 @@ public class TeamListAdapter extends ListAdapter<TeamListAdapter.TeamView, TeamL
      *
      * @param invertedPosition - inverted position in Records
      * @return TeamView or null if there are no teamView exists in
-     * current list with specified position
+     *     current list with specified position
      */
     public TeamView findTeamByInvertedPosition(final int invertedPosition) {
         for (final TeamView teamView : getMTeamViewList()) {

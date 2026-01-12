@@ -29,7 +29,8 @@ public final class DebounceUtil {
     @FunctionalInterface
     public interface DebounceCallback {
         /**
-         * callback method
+         * callback method.
+         *
          * @param query - callback parameter
          */
         void execute(String query);
@@ -45,7 +46,8 @@ public final class DebounceUtil {
      * @param delayMillis - timeout
      * @param callback - callback
      */
-    public static void debounce(final String key, final String query, final int delayMillis, final DebounceCallback callback) {
+    public static void debounce(final String key, final String query, final int delayMillis,
+                                final DebounceCallback callback) {
         cancelDebounce(key);
 
         final Handler handler = new Handler(Looper.getMainLooper());

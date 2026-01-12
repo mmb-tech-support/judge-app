@@ -57,12 +57,12 @@ public final class ControlPointActivity extends MenuActivity implements MemberLi
     private boolean mLongScan;
 
     /**
-     * SearchView component in actionBar
+     * SearchView component in actionBar.
      */
     private SearchView mSearchView;
 
     /**
-     * current term for mSearchView'
+     * current term for mSearchView.
      */
     private String mSearchTerm = "";
 
