@@ -89,6 +89,7 @@ public class MenuActivity extends AppCompatActivity {
         });
     }
 
+
     /**
      * Set russian locale for all activities for debug build type.
      *
