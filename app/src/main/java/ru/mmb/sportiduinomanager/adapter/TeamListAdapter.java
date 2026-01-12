@@ -23,11 +23,16 @@ import ru.mmb.sportiduinomanager.model.Records;
  * Provides the list of teams punched at a station.
  */
 public class TeamListAdapter extends ListAdapter<TeamListAdapter.TeamView, TeamListAdapter.TeamHolder> {
-    private final OnSelect onSelect;
+    private final OnSelect mOnSelect;
+
+    /**
+     * `ListAdapter.submitList` is asynchronous, so we could not use `.getCurrentList` right after
+     * `.submitList`. This list updates immediately in overrided submitList.
+     */
     @Getter
-    List<TeamView> teamViewList = new ArrayList<>();
+    private List<TeamView> mTeamViewList = new ArrayList<>();
     @Getter
-    private TeamView currentSelected = null;
+    private TeamView mCurrentSelected = null;
     private static final DiffUtil.ItemCallback<TeamView> DIFF_CALLBACK = new DiffUtil.ItemCallback<>() {
         @Override
         public boolean areItemsTheSame(@NonNull TeamView oldItem, @NonNull TeamView newItem) {
@@ -40,6 +45,9 @@ public class TeamListAdapter extends ListAdapter<TeamListAdapter.TeamView, TeamL
         }
     };
 
+    /**
+     * Callback definition.
+     */
     @FunctionalInterface
     public interface OnSelect {
         void accept(TeamView team);
@@ -49,12 +57,12 @@ public class TeamListAdapter extends ListAdapter<TeamListAdapter.TeamView, TeamL
 
     public TeamListAdapter(OnSelect onTeamSelect) {
         super(DIFF_CALLBACK);
-        this.onSelect = onTeamSelect;
+        this.mOnSelect = onTeamSelect;
     }
 
     public int getInvertedPositionOfSelectedOrZero() {
-        if (currentSelected == null) return 0;
-        return currentSelected.getPointsPunchPositionInverted();
+        if (mCurrentSelected == null) return 0;
+        return mCurrentSelected.getMPointsPunchPositionInverted();
     }
 
     @NonNull
@@ -63,23 +71,38 @@ public class TeamListAdapter extends ListAdapter<TeamListAdapter.TeamView, TeamL
         final View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.team_list_item, parent, false);
         TeamHolder holder = new TeamHolder(view);
-        view.setOnClickListener(v -> selectTeam(holder.getTeamView()));
+        view.setOnClickListener(v -> selectTeam(holder.getMTeamView()));
         return holder;
     }
 
+    /**
+     * finds TeamView in current list with specified invertedPosition.
+     *
+     * @param invertedPosition - inverted position in Records
+     * @return TeamView or null if there are no teamView exists in current list with specified position
+     */
     public TeamView findTeamByInvertedPosition(int invertedPosition) {
-        for(TeamView teamView : getTeamViewList()) {
-            if (teamView.getPointsPunchPositionInverted() == invertedPosition) return teamView;
+        for (TeamView teamView : getMTeamViewList()) {
+            if (teamView.getMPointsPunchPositionInverted() == invertedPosition) {
+                return teamView;
+            }
         }
         return null;
     }
 
+    /**
+     * Change the selected rows' flags to reflect the new selection and call the callback.
+     * If the specified row matches the current selection, do nothing.
+     *
+     * @param teamView - TeamView of new selection
+     */
     public void selectTeam(TeamView teamView) {
-        if (currentSelected == teamView)
+        if (mCurrentSelected == teamView) {
             return;
+        }
 
-        TeamView oldSelected = currentSelected;
-        currentSelected = teamView;
+        TeamView oldSelected = mCurrentSelected;
+        mCurrentSelected = teamView;
 
         if (oldSelected != null) {
             int oldPosition = getCurrentList().indexOf(oldSelected);
@@ -90,18 +113,21 @@ public class TeamListAdapter extends ListAdapter<TeamListAdapter.TeamView, TeamL
             int position = getCurrentList().indexOf(teamView);
             this.notifyItemChanged(position);
         }
-        onSelect.accept(teamView);
+        mOnSelect.accept(teamView);
     }
 
     @Override
     public void onBindViewHolder(@NonNull TeamListAdapter.TeamHolder holder, int position) {
         TeamView teamView = this.getItem(position);
-        holder.bind(teamView, teamView.equals(currentSelected));
+        holder.bind(teamView, teamView.equals(mCurrentSelected));
     }
 
+    /**
+     * Realization of RecyclerView.ViewHolder for TeamListAdapter.
+     */
     public static final class TeamHolder extends RecyclerView.ViewHolder {
         @Getter
-        TeamView teamView;
+        TeamView mTeamView;
         /**
          * Team number and name.
          */
@@ -115,14 +141,20 @@ public class TeamListAdapter extends ListAdapter<TeamListAdapter.TeamView, TeamL
          */
         private final TextView mTime;
 
+        /**
+         * Binds data of teamView to component holder.
+         *
+         * @param teamView - teamView
+         * @param selected - flag indicating that the row should be marked as selected
+         */
         public void bind(TeamView teamView, boolean selected) {
-            this.teamView = teamView;
+            this.mTeamView = teamView;
             mName.setText(itemView.getResources().getString(R.string.cp_team_name,
-                    teamView.getTeamNumber(), teamView.getTeamName()));
+                    teamView.getMTeamNumber(), teamView.getMTeamName()));
             mCount.setText(itemView.getResources().getString(R.string.list_team_count,
-                    teamView.getTeamMembersCount()));
+                    teamView.getMTeamMembersCount()));
             mTime.setText(itemView.getResources().getString(R.string.list_team_time,
-                    Records.printTime(teamView.getPointTime(), "dd.MM  HH:mm:ss")));
+                    Records.printTime(teamView.getMPointTime(), "dd.MM  HH:mm:ss")));
             itemView.setSelected(selected);
         }
 
@@ -139,24 +171,27 @@ public class TeamListAdapter extends ListAdapter<TeamListAdapter.TeamView, TeamL
         }
     }
 
+    /**
+     * Readonly pojo class with all information needed for team row in this RecyclerView.
+     */
     @Getter
     @EqualsAndHashCode(onlyExplicitlyIncluded = true)
     @Builder
     public static class TeamView {
         @EqualsAndHashCode.Include
-        final int teamNumber;
+        final int mTeamNumber;
 
-        final String teamName;
-        final long pointTime;
-        final int teamMembersCount;
+        final String mTeamName;
+        final long mPointTime;
+        final int mTeamMembersCount;
 
-        final int pointsPunchPosition;
-        final int pointsPunchPositionInverted;
+        final int mPointsPunchPosition;
+        final int mPointsPunchPositionInverted;
     }
 
     @Override
     public void submitList(@Nullable List<TeamView> list) {
         super.submitList(list);
-        this.teamViewList = list;
+        this.mTeamViewList = list;
     }
 }
