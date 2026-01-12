@@ -5,147 +5,103 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.DiffUtil;
+import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import ru.mmb.sportiduinomanager.R;
 import ru.mmb.sportiduinomanager.model.Records;
-import ru.mmb.sportiduinomanager.model.Teams;
 
 /**
  * Provides the list of teams punched at a station.
  */
-public class TeamListAdapter extends RecyclerView.Adapter<TeamListAdapter.TeamHolder> {
-    /**
-     * Interface for list item click processing.
-     */
-    private final OnTeamClicked mOnClick;
-    /**
-     * All teams registered for the raid.
-     */
-    private final Teams mTeams;
-    /**
-     * All team punches at connected station (sorted, one last punch per team).
-     */
-    private final Records mRecords;
+public class TeamListAdapter extends ListAdapter<TeamListAdapter.TeamView, TeamListAdapter.TeamHolder> {
+    private final OnSelect onSelect;
+    @Getter
+    List<TeamView> teamViewList = new ArrayList<>();
+    @Getter
+    private TeamView currentSelected = null;
+    private static final DiffUtil.ItemCallback<TeamView> DIFF_CALLBACK = new DiffUtil.ItemCallback<>() {
+        @Override
+        public boolean areItemsTheSame(@NonNull TeamView oldItem, @NonNull TeamView newItem) {
+            return oldItem.equals(newItem);
+        }
 
-    /**
-     * Last clicked position in team list.
-     */
-    private int mSelectedPos;
+        @Override
+        public boolean areContentsTheSame(@NonNull TeamView oldItem, @NonNull TeamView newItem) {
+            return false;
+        }
+    };
 
-    /**
-     * Adapter constructor.
-     *
-     * @param onClick Interface for click processing in calling activity.
-     * @param teams   List of all registered teams from ControlPointActivity
-     * @param records List of all team punches from ControlPointActivity
-     */
-    public TeamListAdapter(final OnTeamClicked onClick, final Teams teams, final Records records) {
-        super();
-        mOnClick = onClick;
-        mTeams = teams;
-        mRecords = records;
-        mSelectedPos = 0;
+    @FunctionalInterface
+    public interface OnSelect {
+        void accept(TeamView team);
     }
 
-    /**
-     * Create new views (invoked by the layout manager).
-     */
+
+
+    public TeamListAdapter(OnSelect onTeamSelect) {
+        super(DIFF_CALLBACK);
+        this.onSelect = onTeamSelect;
+    }
+
+    public int getInvertedPositionOfSelectedOrZero() {
+        if (currentSelected == null) return 0;
+        return currentSelected.getPointsPunchPositionInverted();
+    }
+
     @NonNull
     @Override
-    public TeamListAdapter.TeamHolder onCreateViewHolder(@NonNull final ViewGroup viewGroup,
-                                                         final int viewType) {
-        final View view = LayoutInflater.from(viewGroup.getContext())
-                .inflate(R.layout.team_list_item, viewGroup, false);
-        return new TeamHolder(view);
+    public TeamHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        final View view = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.team_list_item, parent, false);
+        TeamHolder holder = new TeamHolder(view);
+        view.setOnClickListener(v -> selectTeam(holder.getTeamView()));
+        return holder;
     }
 
-    /**
-     * Replace the contents of a view (invoked by the layout manager).
-     */
+    public TeamView findTeamByInvertedPosition(int invertedPosition) {
+        for(TeamView teamView : getTeamViewList()) {
+            if (teamView.getPointsPunchPositionInverted() == invertedPosition) return teamView;
+        }
+        return null;
+    }
+
+    public void selectTeam(TeamView teamView) {
+        if (currentSelected == teamView)
+            return;
+
+        TeamView oldSelected = currentSelected;
+        currentSelected = teamView;
+
+        if (oldSelected != null) {
+            int oldPosition = getCurrentList().indexOf(oldSelected);
+            this.notifyItemChanged(oldPosition);
+        }
+
+        if (teamView != null) {
+            int position = getCurrentList().indexOf(teamView);
+            this.notifyItemChanged(position);
+        }
+        onSelect.accept(teamView);
+    }
+
     @Override
-    public void onBindViewHolder(@NonNull final TeamHolder holder, final int position) {
-        // Get index of element of mFlash list to display at this position
-        int index = mRecords.size() - position - 1;
-        if (index < 0) {
-            index = 0;
-        }
-        // Get team number at this position
-        final int teamNumber = mRecords.getTeamNumber(index);
-        // Get team name for this number
-        String teamName;
-        if (mTeams == null) {
-            teamName = "";
-        } else {
-            teamName = mTeams.getTeamName(teamNumber);
-            if (teamName == null) {
-                teamName = holder.itemView.getResources().getString(R.string.unknown);
-            }
-        }
-        // Get members count and team time
-        final int teamMask = mRecords.getTeamMask(index);
-        final int teamMembersCount;
-        if (teamMask < 0) {
-            teamMembersCount = 0;
-        } else {
-            teamMembersCount = Teams.getMembersCount(teamMask);
-        }
-        // Update the contents of the view with that team
-        holder.mName.setText(holder.itemView.getResources().getString(R.string.cp_team_name,
-                teamNumber, teamName));
-        holder.mCount.setText(holder.itemView.getResources().getString(R.string.list_team_count,
-                teamMembersCount));
-        holder.mTime.setText(holder.itemView.getResources().getString(R.string.list_team_time,
-                Records.printTime(mRecords.getTeamTime(index), "dd.MM  HH:mm:ss")));
-        // Highlight row if it is selected
-        holder.itemView.setSelected(mSelectedPos == position);
-        // Set my listener for all elements of list item
-        holder.itemView.setOnClickListener(view -> mOnClick.onTeamClick(holder.getAdapterPosition()));
+    public void onBindViewHolder(@NonNull TeamListAdapter.TeamHolder holder, int position) {
+        TeamView teamView = this.getItem(position);
+        holder.bind(teamView, teamView.equals(currentSelected));
     }
 
-    /**
-     * Return the size of team list (invoked by the layout manager).
-     */
-    @Override
-    public int getItemCount() {
-        return mRecords.size();
-    }
-
-    /**
-     * Get position of selected item in RecyclerView list.
-     *
-     * @return Current selected item index
-     */
-    public int getPosition() {
-        return mSelectedPos;
-    }
-
-    /**
-     * Set new selected item in RecyclerView list.
-     *
-     * @param position New selected item index
-     */
-    public void setPosition(final int position) {
-        mSelectedPos = position;
-    }
-
-    /**
-     * Declare interface for click processing.
-     */
-    @SuppressWarnings("PMD.ImplicitFunctionalInterface")
-    public interface OnTeamClicked {
-        /**
-         * Implemented in BluetoothActivity class.
-         *
-         * @param position Position of clicked device in the list of discovered devices
-         */
-        void onTeamClick(int position);
-    }
-
-    /**
-     * Custom ViewHolder for team_list_item layout.
-     */
     public static final class TeamHolder extends RecyclerView.ViewHolder {
+        @Getter
+        TeamView teamView;
         /**
          * Team number and name.
          */
@@ -159,6 +115,17 @@ public class TeamListAdapter extends RecyclerView.Adapter<TeamListAdapter.TeamHo
          */
         private final TextView mTime;
 
+        public void bind(TeamView teamView, boolean selected) {
+            this.teamView = teamView;
+            mName.setText(itemView.getResources().getString(R.string.cp_team_name,
+                    teamView.getTeamNumber(), teamView.getTeamName()));
+            mCount.setText(itemView.getResources().getString(R.string.list_team_count,
+                    teamView.getTeamMembersCount()));
+            mTime.setText(itemView.getResources().getString(R.string.list_team_time,
+                    Records.printTime(teamView.getPointTime(), "dd.MM  HH:mm:ss")));
+            itemView.setSelected(selected);
+        }
+
         /**
          * Holder for list element containing checkbox with team member name.
          *
@@ -170,5 +137,26 @@ public class TeamListAdapter extends RecyclerView.Adapter<TeamListAdapter.TeamHo
             mCount = view.findViewById(R.id.list_team_count);
             mTime = view.findViewById(R.id.list_team_time);
         }
+    }
+
+    @Getter
+    @EqualsAndHashCode(onlyExplicitlyIncluded = true)
+    @Builder
+    public static class TeamView {
+        @EqualsAndHashCode.Include
+        final int teamNumber;
+
+        final String teamName;
+        final long pointTime;
+        final int teamMembersCount;
+
+        final int pointsPunchPosition;
+        final int pointsPunchPositionInverted;
+    }
+
+    @Override
+    public void submitList(@Nullable List<TeamView> list) {
+        super.submitList(list);
+        this.teamViewList = list;
     }
 }

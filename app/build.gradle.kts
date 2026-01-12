@@ -132,4 +132,6 @@ dependencies {
     implementation(libs.acra.core)
     implementation(libs.acra.http)
     implementation(libs.acra.toast)
+    compileOnly("org.projectlombok:lombok:1.18.42")
+    annotationProcessor("org.projectlombok:lombok:1.18.42")
 }

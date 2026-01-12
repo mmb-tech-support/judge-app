@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.webkit.WebView;
@@ -88,6 +89,7 @@ public class MenuActivity extends AppCompatActivity {
             return true;
         });
     }
+
 
     /**
      * Set russian locale for all activities for debug build type.

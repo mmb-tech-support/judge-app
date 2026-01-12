@@ -10,16 +10,21 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.PowerManager;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.appcompat.widget.SearchView;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import ru.mmb.sportiduinomanager.adapter.MemberListAdapter;
@@ -27,14 +32,14 @@ import ru.mmb.sportiduinomanager.adapter.TeamListAdapter;
 import ru.mmb.sportiduinomanager.model.Records;
 import ru.mmb.sportiduinomanager.model.StationAPI;
 import ru.mmb.sportiduinomanager.model.Teams;
+import ru.mmb.sportiduinomanager.utils.DebounceUtil;
 
 /**
  * Provides ability to get Sportiduino records from station, mark team members
  * as absent, update team members mask in a chip and save this data
  * in local database.
  */
-public final class ControlPointActivity extends MenuActivity
-        implements TeamListAdapter.OnTeamClicked, MemberListAdapter.OnMemberClicked {
+public final class ControlPointActivity extends MenuActivity implements MemberListAdapter.OnMemberClicked {
     /**
      * User modified team members mask (it can be saved to chip and to local db).
      */
@@ -49,6 +54,10 @@ public final class ControlPointActivity extends MenuActivity
      * and progress bar should be visible.
      */
     private boolean mLongScan;
+
+    private SearchView searchView;
+
+    private String searchFilter = "";
     /**
      * Receiver of "full scan" messages from station monitoring service.
      */
@@ -58,6 +67,34 @@ public final class ControlPointActivity extends MenuActivity
             onScanProgressChanged(intent);
         }
     };
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+        getMenuInflater().inflate(R.menu.menu_toolbar, menu);
+        MenuItem searchItem = menu.findItem(R.id.action_search);
+        searchView = (SearchView) searchItem.getActionView();
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                DebounceUtil.debounce("search_vew", newText, 300, this::onChange);
+                return true;
+            }
+
+            public void onChange(String s) {
+                if (s == null) s="";
+                searchFilter = s.trim().toLowerCase();
+                updateTeamList();
+            }
+        });
+        return true;
+    }
+
     /**
      * RecyclerView with team members.
      */
@@ -121,8 +158,9 @@ public final class ControlPointActivity extends MenuActivity
         final RecyclerView.LayoutManager teamsLM = new LinearLayoutManager(this);
         teamsList.setLayoutManager(teamsLM);
         // Specify an RecyclerView adapter and initialize it
-        mTeamAdapter = new TeamListAdapter(this, MainApp.mTeams, MainApp.mPointPunches);
+        mTeamAdapter = new TeamListAdapter(this::onTeamSelect);
         teamsList.setAdapter(mTeamAdapter);
+        updateTeamList();
         // Restore team list position and update activity layout
         int restoredPosition = MainApp.UI_STATE.getTeamListPosition();
         int maxPosition = MainApp.mPointPunches.size() - 1;
@@ -132,8 +170,35 @@ public final class ControlPointActivity extends MenuActivity
             MainApp.UI_STATE.setTeamListPosition(restoredPosition);
         }
         updateMasks(true, restoredPosition);
-        mTeamAdapter.setPosition(restoredPosition);
+
+        mTeamAdapter.selectTeam(mTeamAdapter.findTeamByInvertedPosition(restoredPosition));
         updateLayout();
+    }
+
+    private void onTeamSelect(TeamListAdapter.TeamView teamView) {
+        int newInvertedPosition = teamView == null ? 0 : teamView.getPointsPunchPositionInverted();
+        // Set masks for selected team
+        updateMasks(false, newInvertedPosition);
+        // Save new position and mask in main application
+        MainApp.UI_STATE.setTeamListPosition(newInvertedPosition);
+        MainApp.UI_STATE.setTeamMask(mTeamMask);
+        // Update layout to display new selected team
+        updateLayout();
+    }
+
+    private void updateTeamList() {
+        final int n = MainApp.mPointPunches.size();
+        final List<TeamListAdapter.TeamView> newTeamList = new ArrayList<>(n);
+        for(int i=0; i<n; i++) {
+            TeamListAdapter.TeamView tw = createTeamViewByInvertedPosition(i);
+            if (searchFilter == null || searchFilter.isEmpty() || (tw.equals(mTeamAdapter.getCurrentSelected()))) {
+                newTeamList.add(tw);
+            } else {
+                String key = String.format("%d %s", tw.getTeamNumber(), tw.getTeamName()).toLowerCase();
+                if (key.contains(searchFilter)) newTeamList.add(tw);
+            }
+        }
+        mTeamAdapter.submitList(newTeamList);
     }
 
     @Override
@@ -144,6 +209,15 @@ public final class ControlPointActivity extends MenuActivity
     }
 
     @Override
+    public void onBackPressed() {
+        if (this.searchFilter.isEmpty()) {
+            super.onBackPressed();
+        } else {
+            this.searchView.setQuery("", true);
+        }
+    }
+
+    @Override
     protected void onDestroy() {
         // Stop monitoring service
         stopMonitoringService();
@@ -151,26 +225,6 @@ public final class ControlPointActivity extends MenuActivity
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mDataReceiver);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mProgressReceiver);
         super.onDestroy();
-    }
-
-    /**
-     * The onClick implementation of TeamListAdapter RecyclerView item click.
-     */
-    @Override
-    public void onTeamClick(final int position) {
-        // Set masks for selected team
-        updateMasks(false, position);
-        // Change position in team list
-        final int oldPosition = mTeamAdapter.getPosition();
-        mTeamAdapter.setPosition(position);
-        // Save new position and mask in main application
-        MainApp.UI_STATE.setTeamListPosition(position);
-        MainApp.UI_STATE.setTeamMask(mTeamMask);
-        // Update team list
-        mTeamAdapter.notifyItemChanged(oldPosition);
-        mTeamAdapter.notifyItemChanged(position);
-        // Update layout to display new selected team
-        updateLayout();
     }
 
     /**
@@ -210,8 +264,10 @@ public final class ControlPointActivity extends MenuActivity
             Toast.makeText(getApplicationContext(), R.string.err_internal_error, Toast.LENGTH_LONG).show();
             return;
         }
+        final TeamListAdapter.TeamView selected = mTeamAdapter.getCurrentSelected();
+        final int invertedPosition = selected == null ? 0 : selected.getPointsPunchPositionInverted();
         // Get team number
-        final int index = MainApp.mPointPunches.size() - 1 - mTeamAdapter.getPosition();
+        final int index = MainApp.mPointPunches.size() - 1 - invertedPosition;
         final int teamNumber = MainApp.mPointPunches.getTeamNumber(index);
         // Add new record to global list with same point time and new mask
         if (!MainApp.mAllRecords.updateTeamMask(teamNumber, mTeamMask, MainApp.mStation, MainApp.mDatabase, false)) {
@@ -238,12 +294,13 @@ public final class ControlPointActivity extends MenuActivity
         }
         startMonitoringService();
         // Rebuild masks class members
-        updateMasks(false, mTeamAdapter.getPosition());
+        updateMasks(false, invertedPosition);
         // Disable button after successful saving of new mask
         updateMaskButton();
         // Update list of team members and their selection
         final List<String> teamMembers = MainApp.mTeams.getMembersNames(teamNumber);
         mMemberAdapter.updateList(teamMembers, mOriginalMask, mTeamMask);
+        updateTeamList();
     }
 
     /**
@@ -251,11 +308,11 @@ public final class ControlPointActivity extends MenuActivity
      *
      * @param restore  True if we are starting to work with new team,
      *                 False if we are restoring mask after activity restart
-     * @param position Position of selected team in the list
+     * @param invertedPosition Position of selected team in the list
      */
-    private void updateMasks(final boolean restore, final int position) {
+    private void updateMasks(final boolean restore, final int invertedPosition) {
         // Get the original mask of selected team
-        final int index = MainApp.mPointPunches.size() - 1 - position;
+        final int index = MainApp.mPointPunches.size() - 1 - invertedPosition;
         mOriginalMask = MainApp.mPointPunches.getTeamMask(index);
         if (restore) {
             // Restore current mask from main application
@@ -291,10 +348,15 @@ public final class ControlPointActivity extends MenuActivity
         // Do nothing if no new data has been arrived
         if (result == 0) return;
         // Update layout if new data has been arrived and/or error has been occurred
-        if (mTeamAdapter.getPosition() == 0) {
+        int lastSelectedInvertedPos = mTeamAdapter.getInvertedPositionOfSelectedOrZero();
+        updateTeamList();
+        if (lastSelectedInvertedPos == 0) {
             // Reset current mask if we at first item of team list
             // as it is replaced with new team just arrived
             updateMasks(false, 0);
+            if (mTeamAdapter.getItemCount() > 0) {
+                mTeamAdapter.selectTeam(mTeamAdapter.getTeamViewList().get(0));
+            }
         } else {
             // Change position in the list to keep current team selected
             int newPosition = 0;
@@ -305,17 +367,39 @@ public final class ControlPointActivity extends MenuActivity
                     break;
                 }
             }
-            mTeamAdapter.setPosition(newPosition);
-            MainApp.UI_STATE.setTeamListPosition(newPosition);
+            mTeamAdapter.selectTeam(createTeamViewByInvertedPosition(newPosition));
         }
-        // Update team list as we have a new team in it
-        mTeamAdapter.notifyDataSetChanged();
         // Update activity layout as some elements has been changed
         updateLayout();
         // Menu should be changed if we have new records unsent to site
         updateMenuItems(R.id.control_point);
         // Display station communication error (if any)
         if (result > 0) Toast.makeText(getApplicationContext(), result, Toast.LENGTH_SHORT).show();
+    }
+
+    private TeamListAdapter.TeamView createTeamViewByInvertedPosition(int invertedPosition) {
+        int index = MainApp.mPointPunches.size() - invertedPosition - 1;
+        if (index < 0 || invertedPosition < 0) return null;
+        int teamNumber = MainApp.mPointPunches.getTeamNumber(index);
+        String teamName = MainApp.mTeams.getTeamName(teamNumber);
+        if (teamName == null) {
+            teamName = getResources().getString(R.string.unknown);
+        }
+        int teamMask = MainApp.mPointPunches.getTeamMask(index);
+        int teamMembersCount = 0;
+        if (teamMask >= 0) {
+            teamMembersCount = Teams.getMembersCount(teamMask);
+        }
+
+        return TeamListAdapter.TeamView.builder()
+                .teamNumber(teamNumber)
+                .teamName(teamName)
+                .teamMembersCount(teamMembersCount)
+                .pointTime(MainApp.mPointPunches.getTeamTime(index))
+                .pointsPunchPosition(index)
+                .pointsPunchPositionInverted(invertedPosition)
+                .build();
+
     }
 
     /**
@@ -373,7 +457,8 @@ public final class ControlPointActivity extends MenuActivity
             return;
         }
         // Get index of our team in mPointPunches team punches list
-        final int index = MainApp.mPointPunches.size() - 1 - mTeamAdapter.getPosition();
+        final TeamListAdapter.TeamView selected = mTeamAdapter.getCurrentSelected();
+        final int index = selected == null ? 0 : selected.getPointsPunchPosition();
         // Update team number and name
         final int teamNumber = MainApp.mPointPunches.getTeamNumber(index);
         final String teamName = MainApp.mTeams.getTeamName(teamNumber);
