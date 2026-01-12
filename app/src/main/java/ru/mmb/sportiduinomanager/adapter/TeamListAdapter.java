@@ -127,7 +127,7 @@ public class TeamListAdapter extends ListAdapter<TeamListAdapter.TeamView, TeamL
      * @param teamView - TeamView of new selection
      */
     public void selectTeam(final TeamView teamView) {
-        if (mCurrentSelected.equals(teamView)) {
+        if (mCurrentSelected != null && mCurrentSelected.equals(teamView)) {
             return;
         }
 
