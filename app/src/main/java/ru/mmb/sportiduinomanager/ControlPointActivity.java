@@ -25,6 +25,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import ru.mmb.sportiduinomanager.adapter.MemberListAdapter;
 import ru.mmb.sportiduinomanager.adapter.TeamListAdapter;
@@ -38,6 +39,7 @@ import ru.mmb.sportiduinomanager.utils.DebounceUtil;
  * as absent, update team members mask in a chip and save this data
  * in local database.
  */
+@SuppressWarnings("PMD.ExcessiveImports")
 public final class ControlPointActivity extends MenuActivity implements MemberListAdapter.OnMemberClicked {
     /**
      * User modified team members mask (it can be saved to chip and to local db).
@@ -54,9 +56,25 @@ public final class ControlPointActivity extends MenuActivity implements MemberLi
      */
     private boolean mLongScan;
 
+    /**
+     * SearchView component in actionBar
+     */
     private SearchView mSearchView;
 
+    /**
+     * current term for mSearchView'
+     */
     private String mSearchTerm = "";
+
+    /**
+     * RecyclerView with team members.
+     */
+    private MemberListAdapter mMemberAdapter;
+    /**
+     * RecyclerView with list of teams punched at the station.
+     */
+    private TeamListAdapter mTeamAdapter;
+
     /**
      * Receiver of "full scan" messages from station monitoring service.
      */
@@ -68,40 +86,31 @@ public final class ControlPointActivity extends MenuActivity implements MemberLi
     };
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(final Menu menu) {
         super.onCreateOptionsMenu(menu);
         getMenuInflater().inflate(R.menu.menu_toolbar, menu);
-        MenuItem searchItem = menu.findItem(R.id.action_search);
+        final MenuItem searchItem = menu.findItem(R.id.action_search);
         mSearchView = (SearchView) searchItem.getActionView();
         mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
-            public boolean onQueryTextSubmit(String query) {
+            public boolean onQueryTextSubmit(final String query) {
                 return false;
             }
 
             @Override
-            public boolean onQueryTextChange(String newText) {
-                DebounceUtil.debounce("search_vew", newText, 300, this::onChange);
+            public boolean onQueryTextChange(final String newText) {
+                DebounceUtil.debounce("search_vew", newText == null ? "" : newText, 300, this::onChange);
                 return true;
             }
 
-            public void onChange(String s) {
-                if (s == null) s = "";
-                mSearchTerm = s.trim().toLowerCase();
+            private void onChange(final String newText) {
+                mSearchTerm = newText.trim().toLowerCase(Locale.getDefault());
                 updateTeamList();
             }
         });
         return true;
     }
 
-    /**
-     * RecyclerView with team members.
-     */
-    private MemberListAdapter mMemberAdapter;
-    /**
-     * RecyclerView with list of teams punched at the station.
-     */
-    private TeamListAdapter mTeamAdapter;
     /**
      * Receiver of "data changed" messages from station monitoring service.
      */
@@ -174,8 +183,9 @@ public final class ControlPointActivity extends MenuActivity implements MemberLi
         updateLayout();
     }
 
-    private void onTeamSelect(TeamListAdapter.TeamView teamView) {
-        int newInvertedPosition = teamView == null ? 0 : teamView.getMPointsPunchPositionInverted();
+    private void onTeamSelect(final TeamListAdapter.TeamView teamView) {
+        @SuppressWarnings("PMD.LongVariable")
+        final int newInvertedPosition = teamView == null ? 0 : teamView.getMPointsPunchPositionInverted();
         // Set masks for selected team
         updateMasks(false, newInvertedPosition);
         // Save new position and mask in main application
@@ -186,15 +196,17 @@ public final class ControlPointActivity extends MenuActivity implements MemberLi
     }
 
     private void updateTeamList() {
-        final int n = MainApp.mPointPunches.size();
-        final List<TeamListAdapter.TeamView> newTeamList = new ArrayList<>(n);
-        for (int i = 0; i < n; i++) {
-            TeamListAdapter.TeamView tw = createTeamViewByInvertedPosition(i);
-            if (mSearchTerm == null || mSearchTerm.isEmpty() || (tw.equals(mTeamAdapter.getMCurrentSelected()))) {
-                newTeamList.add(tw);
+        final int size = MainApp.mPointPunches.size();
+        final List<TeamListAdapter.TeamView> newTeamList = new ArrayList<>(size);
+        for (int i = 0; i < size; i++) {
+            final TeamListAdapter.TeamView teamView = createTeamViewByInvertedPosition(i);
+            if (mSearchTerm == null || mSearchTerm.isEmpty() || teamView.equals(mTeamAdapter.getMCurrentSelected())) {
+                newTeamList.add(teamView);
             } else {
-                String key = String.format("%d %s", tw.getMTeamNumber(), tw.getMTeamName()).toLowerCase();
-                if (key.contains(mSearchTerm)) newTeamList.add(tw);
+                final String key = String.format(Locale.getDefault(), "%d %s",
+                        teamView.getMTeamNumber(), teamView.getMTeamName())
+                        .toLowerCase(Locale.getDefault());
+                if (key.contains(mSearchTerm)) newTeamList.add(teamView);
             }
         }
         mTeamAdapter.submitList(newTeamList);
@@ -347,7 +359,8 @@ public final class ControlPointActivity extends MenuActivity implements MemberLi
         // Do nothing if no new data has been arrived
         if (result == 0) return;
         // Update layout if new data has been arrived and/or error has been occurred
-        int lastSelectedInvertedPos = mTeamAdapter.getInvertedPositionOfSelectedOrZero();
+        @SuppressWarnings("PMD.LongVariable")
+        final int lastSelectedInvertedPos = mTeamAdapter.getInvertedPositionOfSelectedOrZero();
         updateTeamList();
         if (lastSelectedInvertedPos == 0) {
             // Reset current mask if we at first item of team list
@@ -376,15 +389,15 @@ public final class ControlPointActivity extends MenuActivity implements MemberLi
         if (result > 0) Toast.makeText(getApplicationContext(), result, Toast.LENGTH_SHORT).show();
     }
 
-    private TeamListAdapter.TeamView createTeamViewByInvertedPosition(int invertedPosition) {
-        int index = MainApp.mPointPunches.size() - invertedPosition - 1;
+    private TeamListAdapter.TeamView createTeamViewByInvertedPosition(final int invertedPosition) {
+        final int index = MainApp.mPointPunches.size() - invertedPosition - 1;
         if (index < 0 || invertedPosition < 0) return null;
-        int teamNumber = MainApp.mPointPunches.getTeamNumber(index);
+        final int teamNumber = MainApp.mPointPunches.getTeamNumber(index);
         String teamName = MainApp.mTeams.getTeamName(teamNumber);
         if (teamName == null) {
             teamName = getResources().getString(R.string.unknown);
         }
-        int teamMask = MainApp.mPointPunches.getTeamMask(index);
+        final int teamMask = MainApp.mPointPunches.getTeamMask(index);
         int teamMembersCount = 0;
         if (teamMask >= 0) {
             teamMembersCount = Teams.getMembersCount(teamMask);
